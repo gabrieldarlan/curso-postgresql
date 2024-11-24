@@ -547,10 +547,175 @@ values
 
 
 
-update cliente
-set nome = 'Manoel'
-where idcliente = 
+-- Funções agregadas 
+
+-- média avg
+select avg(valor) from pedido;
+
+-- count
+select count(m.idmunicipio) from municipio m;
+
+select count (*) from municipio m;
+select count(logradouro) from transportadora; 
+select count(idtransportadora) from transportadora;
+
+select * from municipio m;
+
+select count(idmunicipio) from municipio;
+
+select count(idmunicipio) from municipio where iduf = 2;
+
+--max, min
+select max(valor) from pedido;
+select min(valor), max(valor) from pedido;
+
+--sum
+select sum(valor) from pedido;
+
+--group by simples
+
+select
+	p.idcliente,
+	sum(p.valor)
+from
+	pedido p
+group by
+	p.idcliente
+order by
+	p.idcliente; 
+
+--group by simples com condição
+
+select
+	p.idcliente,
+	sum(p.valor)
+from
+	pedido p
+group by
+	p.idcliente
+having sum(p.valor) > 500 -- como se fosse um where  
+order by
+	sum(p.valor);
+
+-- Relacionamentos com joins
+-- left join, trás o resultado independemente se houver valor na tabela da direita, no caso a de profissão
+select
+	c.nome as "Cliente",
+	coalesce( p.nome, 'N/A') as "Profissão"
+from
+	cliente c
+left outer join profissao p on
+	(c.idprofissao = p.idprofissao);
+
+-- inner obriga que existe o relacionamento entre os dois ids que estão sendo comparados
+select
+	c.nome as "Cliente",
+	coalesce( p.nome, 'N/A') as "Profissão"
+from
+	cliente c
+inner join profissao p on
+	(c.idprofissao = p.idprofissao);
+
+-- right join, trás o resultado independemente se houver valor na tabela da esquerda, no caso a de cliente
+select
+	c.nome as "Cliente",
+	coalesce( p.nome, 'N/A') as "Profissão"
+from
+	cliente c
+right outer join profissao p on
+	(c.idprofissao = p.idprofissao);
 
 
+-- comandos adicionais
+select * from pedido;
+
+-- extract -> extrair dia, mes, ano de uma data
+select
+	data_pedido,
+	extract(day
+from 
+	data_pedido) as dia,
+	extract(month
+from
+	data_pedido) as mes,
+	extract(year
+from
+	data_pedido) as ano
+from
+	pedido;
+
+-- substring: extrair apenas alguns caracteres de uma string
+select
+	nome,
+	substring(nome
+from
+	1 for 5),
+	substring(nome, 2) as "extraindo a partir do 2 caracter em diante"
+from
+	cliente; 
+-- converter texto para maiusculo ou minusculo
+select nome, upper(nome), lower(nome)  from cliente;
+
+-- coalesce permite colocar um valor padrão em colunas caso o conteudo delas seja null
+select
+	c.nome,
+	c.cpf,
+	coalesce(c.cpf,
+	'Não informado')
+from
+	cliente c ;
+
+-- case é o mesmo conceito do switch case, evaluate e etc
+select
+	case
+		u.sigla 
+		when 'PR' then 'Paraná'
+		when 'SC' then 'Santa Catarina'
+		else 'Outros'
+	end as uf
+from
+	uf u ;
+
+select * from uf;
+
+--subconsultas
+
+-- selecionar a data do pedido e o valor onde o valo seja maior que média dos valores de todos os pedidos
+
+select 
+	data_pedido,
+	valor
+from 
+	pedido
+where
+	valor > (
+	select
+		avg(valor)
+	from
+		pedido);
+
+-- exemplo com count
+	
+select
+	p.data_pedido,
+	p.valor,
+	(select sum(pp.quantidade) from pedido_produto pp where pp.idpedido = p.idpedido  ) as total
+from
+	pedido p;
+
+-- exemplo com update
+
+update
+	pedido
+set
+	valor = valor + ((valor * 5)/ 100)
+where
+	valor >
+	(select
+	avg(valor)
+from
+	pedido);
+
+select * from pedido p;
 
 
